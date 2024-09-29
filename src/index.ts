@@ -1,9 +1,10 @@
 import express, { urlencoded, json, ErrorRequestHandler } from "express";
+import cors from "cors";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
 import AdmZip from "adm-zip";
-import { authorizationMiddleware } from "./utils";
+import { authorizationMiddleware, HttpError } from "./utils";
 
 const port = process.env.PORT || 8000;
 
@@ -35,6 +36,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 app.use(urlencoded({ extended: true }));
+app.use(cors());
 app.use(json());
 
 // this will serve the static files hosted in OUT directory
@@ -51,7 +53,7 @@ app.post(
   async (req, res, next) => {
     try {
       const filePath = req.file?.path;
-      if (!filePath) throw new Error("Missing file");
+      if (!filePath) throw new HttpError("Missing file", 400);
 
       const filenameArr = req.file?.filename.split(".");
       const extension = filenameArr?.pop();
@@ -90,11 +92,15 @@ app.all("*", (_req, _res, next) => {
 });
 
 app.use(((error, req, res, _next) => {
-  if (error instanceof Error) {
-    return res.status(400).json({
+  if (error instanceof HttpError) {
+    const data = {
       message: error.message,
       path: `${req.method} ${req.url}`,
-    });
+    };
+
+    console.log({ ...data, status: error.status || 500 });
+
+    return res.status(error.status || 500).json(data);
   }
 
   res.status(404).json({
