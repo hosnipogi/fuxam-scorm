@@ -1,5 +1,5 @@
 {
-  "name": "fuxam-node",
+  "name": "fuxam-scorm",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -24,6 +24,7 @@
     "@types/express": "^5.0.0",
     "@types/multer": "^1.4.12",
     "nodemon": "^3.1.7",
+    "pm2": "^5.4.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.2"
   }
